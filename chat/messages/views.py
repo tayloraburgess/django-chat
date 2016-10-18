@@ -33,6 +33,7 @@ def detail(request, message_id):
     if request.method == 'GET':
         message = get_object_or_404(Message, pk=message_id)
         data = serializers.serialize("json", [message])
+        data = data.strip('[]')
         return HttpResponse(data, content_type='application/json')
     else:
         return HttpResponse(status=405)

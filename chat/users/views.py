@@ -9,10 +9,10 @@ from messages.models import Message
 from django.contrib.auth.models import User
 from django.db.models import Q
 
-@csrf_exempt
 def all(request):
     if request.method == 'GET':
-        data = serializers.serialize('json', User.objects.all())
+        query = User.objects.all()
+        data = serializers.serialize('json', query, fields=('username'))
         return HttpResponse(data, content_type='application/json')
     else:
        return HttpResponse(status=405)
@@ -20,7 +20,8 @@ def all(request):
 def detail(request, user_id):
     if request.method == 'GET':
         user = get_object_or_404(User, pk=user_id)
-        data = serializers.serialize("json", [user])
+        data = serializers.serialize("json", [user], fields=('username'))
+        data = data.strip('[]')
         return HttpResponse(data, content_type='application/json')
     else:
         return HttpResponse(status=405)
@@ -42,7 +43,7 @@ def friends(request, user_id):
             users.add(m.recipient)
         for m in Message.objects.filter(recipient=user_id).select_related('author'):
             users.add(m.author)
-        data = serializers.serialize('json', users)
+        data = serializers.serialize('json', users, fields=('username'))
         return HttpResponse(data, content_type='application/json')
     else:
         return HttpResponse(status=405)
