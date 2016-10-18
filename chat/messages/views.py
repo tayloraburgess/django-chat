@@ -1,3 +1,5 @@
-from django.shortcuts import render
+def all(request):
+    pass
 
-# Create your views here.
+def detail(request):
+    pass
