@@ -13,6 +13,12 @@ function getUserList(resObj) {
     });
 }
 
+function getMessageList(resObj) {
+    return resObj.map((obj) => {
+        return obj.fields.text
+    });
+}
+
 class App extends Component {
     render() {
         return (
@@ -22,40 +28,62 @@ class App extends Component {
         );
     }
 }
+
 const SPA = React.createClass({
     getInitialState: function() {
         return {
-            userPk: 3
+            userPk: 3,
+            currentStream: 2,
+            friendList: [],
+            messageList: []
         };
     },
 
-    render: function() {
-        return (
-            <div>
-                <Friends friendsURL={`/api/v1/users/${this.state.userPk}/friends`} />
-            </div>
-        );
-    } 
-});
-
-const Friends = React.createClass({
-    getInitialState: function() {
-        return {
-            friendList: []
-        }
-    },
-
     componentDidMount: function() {
-        this.serverRequest =  $.get(this.props.friendsURL, (res) => {
+        const friendsURL = `/api/v1/users/${this.state.userPk}/friends`
+        const streamURL = `/api/v1/users/${this.state.userPk}/stream/${this.state.currentStream}`
+        this.serverRequest = $.get(streamURL, (res) => {
+            const messages = getMessageList(res);
+            this.setState({
+                messageList: messages
+            });
+        });
+        this.serverRequest =  $.get(friendsURL, (res) => {
            const users = getUserList(res);
            this.setState({
                friendList: users  
            }); 
         });
-    }, 
+    },
 
     render: function() {
-        const names = this.state.friendList.map((friend) => {
+        return (
+            <div>
+                <Friends friendList={this.state.friendList} />
+                <Messages messageList={this.state.messageList} />
+            </div>
+        );
+    } 
+});
+
+const Messages = React.createClass({
+    render: function() {
+        const messages = this.props.messageList.map((message) => {
+            return (<li> { message } </li>);
+        });
+        return (
+            <div>
+                <ul>
+                    { messages }
+                </ul>
+            </div>
+        );
+    }
+});
+
+const Friends = React.createClass({
+    render: function() {
+        const names = this.props.friendList.map((friend) => {
             return (
                <li>{ friend.username }</li> 
             );
