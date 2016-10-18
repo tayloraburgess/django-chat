@@ -2,20 +2,73 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 
-class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2>Welcome to React</h2>
-        </div>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
-      </div>
-    );
-  }
+import $ from 'jquery';
+
+function getUserList(resObj) {
+    return resObj.map((obj) => {
+        return {
+            pk: obj.pk,
+            username: obj.fields.username
+        }
+    });
 }
+
+class App extends Component {
+    render() {
+        return (
+            <div>
+                <SPA />
+            </div>
+        );
+    }
+}
+const SPA = React.createClass({
+    getInitialState: function() {
+        return {
+            userPk: 3
+        };
+    },
+
+    render: function() {
+        return (
+            <div>
+                <Friends friendsURL={`/api/v1/users/${this.state.userPk}/friends`} />
+            </div>
+        );
+    } 
+});
+
+const Friends = React.createClass({
+    getInitialState: function() {
+        return {
+            friendList: []
+        }
+    },
+
+    componentDidMount: function() {
+        this.serverRequest =  $.get(this.props.friendsURL, (res) => {
+           const users = getUserList(res);
+           this.setState({
+               friendList: users  
+           }); 
+        });
+    }, 
+
+    render: function() {
+        const names = this.state.friendList.map((friend) => {
+            return (
+               <li>{ friend.username }</li> 
+            );
+        });
+ 
+        return(
+            <div>
+                <ul>
+                    {names}
+                </ul>
+            </div>
+        );
+    }
+});
 
 export default App;

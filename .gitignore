@@ -3,3 +3,9 @@ venv/
 *.swp
 *.sqlite3
 *.pyc
+
+node_modules
+coverage
+build
+.DS_Store
+npm-debug.log
