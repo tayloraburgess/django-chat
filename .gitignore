@@ -1,3 +1,5 @@
 venv/
 .env
 *.swp
+*.sqlite3
+*.pyc
