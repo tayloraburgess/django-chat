@@ -32,7 +32,7 @@ const SPA = React.createClass({
         };
     },
 
-    eventListen: function() {
+    sockets: function() {
         const ws = new WebSocket('ws://localhost:8000');
         ws.onmessage = (message) => {
             const data = JSON.parse(message.data)
@@ -92,7 +92,7 @@ const SPA = React.createClass({
                });
             }
        });
-        this.eventListen();
+        this.sockets();
     },
 
     changeStream: function(userPk) {
@@ -105,18 +105,31 @@ const SPA = React.createClass({
         let messageList;
         let friendList;
         if (Object.keys(this.state.streamsDict).length > 0) {
-            messageList = this.state.streamsDict[this.state.currentStream];
+            const currentStream = this.state.streamsDict[this.state.currentStream];
+            if (currentStream) {
+                messageList = currentStream;
+            } else {
+                messageList = [];
+            }
             friendList = Object.keys(this.state.streamsDict);
         } else {
             messageList = [];
             friendList = [];
         }       
+        const otherUsers = Object.keys(this.state.userDict).filter((user) => {
+            if (friendList.indexOf(user) === -1 && user !== this.state.userPk) {
+                return true; 
+            }
+            return false;
+        });
 
         return (
             <div>
 
             <h1>{this.state.userDict[this.state.userPk]}</h1>
                 <Friends userDict={this.state.userDict} friendList={friendList} changeStream={this.changeStream}/>
+            <hr />
+<Friends userDict={this.state.userDict} friendList={otherUsers} changeStream={this.changeStream}/>
                 <h3>{this.state.userDict[this.state.currentStream]}</h3>
                 <Messages messageList={messageList} />
                 <Write socket={this.state.socket} author={this.state.userPk} recipient={this.state.currentStream} />

@@ -10,6 +10,14 @@ def message(message):
     if (data['type'] == 'handshake'):
         Group(str(data['user'])).add(message.reply_channel)
     elif (data['type'] == 'message'):
+        new_message = Message.objects.create(
+            text=data['text'],
+            date_sent=int(data['date_sent']),
+            author=User.objects.get(pk=data['author']),
+            recipient=User.objects.get(pk=data['recipient'])
+        )
+        new_message.save()
+         
         broadcast = {
             'type': 'new_message',
             'author': data['author'],
@@ -18,14 +26,6 @@ def message(message):
         Group(str(data['recipient'])).send({
             'text': json.dumps(broadcast)
         })
-        
-        new_message = Message.objects.create(
-            text=data['text'],
-            date_sent=int(data['date_sent']),
-            author=User.objects.get(pk=data['author']),
-            recipient=User.objects.get(pk=data['recipient'])
-        )
-        new_message.save()
         
         reply = {
             'type': 'message_echo',
