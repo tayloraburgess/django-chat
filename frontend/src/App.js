@@ -36,11 +36,19 @@ const SPA = React.createClass({
         const ws = new WebSocket('ws://localhost:8000');
         ws.onmessage = (message) => {
             const data = JSON.parse(message.data)
-            const newState = Object.assign({}, this.state.streamsDict);
-            newState[data.author].push(data.text)
-            this.setState({
-                streamsDict: newState, 
-            });
+            if (data.type === 'new_message') {
+                const newState = Object.assign({}, this.state.streamsDict);
+                newState[data.author].push(data.text)
+                this.setState({
+                    streamsDict: newState 
+                });
+            } else if (data.type === 'message_echo') {
+                const newState = Object.assign({}, this.state.streamsDict);
+                newState[data.recipient].push(data.text)
+                this.setState({
+                    streamsDict: newState 
+                });
+            }
         }
         ws.onopen = () => {
             const handshake = {
@@ -149,17 +157,10 @@ const Write = React.createClass({
         }
         this.props.socket.send(JSON.stringify(data));
         event.preventDefault();
-        $.ajax({
-            type: 'POST',
-            url: 'api/v1/messages/',
-            contentType: 'application/json',
-            data: JSON.stringify(data),
-            success: (res) => {
-                this.setState({
-                    text: ''
-                });
-            }
-        })
+        this.setState({
+            text: ''
+        });
+        
     },
 
     editMessage: function(event) {

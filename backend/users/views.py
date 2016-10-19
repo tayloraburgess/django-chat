@@ -41,7 +41,6 @@ def streams(request, user_id):
             query = Message.objects.filter(messages_from | messages_to)
             message_list = serializers.serialize('json', query)
             data['streams'].append({'friend': friend_id.pk, 'messages': message_list})
-        print(data)
         return HttpResponse(json.dumps(data), content_type='application/json')
     else:
         return HttpResponse(status=405)
