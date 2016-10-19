@@ -26,7 +26,6 @@ const SPA = React.createClass({
         return {
             userPk: parseInt(tempUser),
             currentStream: 0,
-            friendList: [],
             streamsDict: {},
             userDict: {},
             socket: {}
@@ -69,34 +68,22 @@ const SPA = React.createClass({
                 });
             }
         });
-        const friendsURL = `/api/v1/users/${this.state.userPk}/friends`;
-        $.ajax({
-            type: 'GET',
-            url: friendsURL,
-            success: (res1) => {
-                const users = res1.map((user) => {
-                    return user.pk;
-                }); 
-                this.setState({
-                    friendList: users
-                });
-               this.state.friendList.forEach((user) => {
-                   const streamURL = `/api/v1/users/${this.state.userPk}/stream/${user}`;
-                   $.ajax({
-                       type: 'GET',
-                       url: streamURL,
-                       success: (res) => {
-                           const newState = Object.assign({}, this.state.streamsDict);
-                           newState[user] = getMessageList(res);
-                           this.setState({
-                               streamsDict: newState, 
-                               currentStream: user
-                           });
-                        }
-                   });
-                });  
-            } 
-        });
+       const streamURL = `/api/v1/users/${this.state.userPk}/streams/`;
+       $.ajax({
+           type: 'GET',
+           url: streamURL,
+           success: (res) => {
+               const streamsDict = {}; 
+               res.streams.forEach((stream) => {
+                   console.log(stream);
+                   streamsDict[stream.friend] = getMessageList(JSON.parse(stream.messages));
+               });
+               this.setState({
+                   streamsDict: streamsDict, 
+                   currentStream: Object.keys(streamsDict)[0]
+               });
+            }
+       });
         this.eventListen();
     },
 
@@ -108,16 +95,20 @@ const SPA = React.createClass({
 
     render: function() {
         let messageList;
+        let friendList;
         if (Object.keys(this.state.streamsDict).length > 0) {
             messageList = this.state.streamsDict[this.state.currentStream];
+            friendList = Object.keys(this.state.streamsDict);
         } else {
             messageList = [];
-        }
+            friendList = [];
+        }       
+
         return (
             <div>
 
             <h1>{this.state.userDict[this.state.userPk]}</h1>
-                <Friends userDict={this.state.userDict} friendList={this.state.friendList} changeStream={this.changeStream}/>
+                <Friends userDict={this.state.userDict} friendList={friendList} changeStream={this.changeStream}/>
                 <h3>{this.state.userDict[this.state.currentStream]}</h3>
                 <Messages messageList={messageList} />
                 <Write socket={this.state.socket} author={this.state.userPk} recipient={this.state.currentStream} />

@@ -26,13 +26,23 @@ def detail(request, user_id):
     else:
         return HttpResponse(status=405)
     
-def stream(request, user_id, chat_user_id):
+def streams(request, user_id):
     if request.method == 'GET':
-        messages_from = Q(author=user_id, recipient=chat_user_id)
-        messages_to = Q(author=chat_user_id, recipient=user_id)
-        query = Message.objects.filter(messages_from | messages_to)
-        data = serializers.serialize('json', query)
-        return HttpResponse(data, content_type='application/json')
+        friends = set()
+        for m in Message.objects.filter(author=user_id).select_related('recipient'):
+            friends.add(m.recipient)
+        for m in Message.objects.filter(recipient=user_id).select_related('author'):
+            friends.add(m.author)
+
+        data = {'streams': []}
+        for friend_id in friends:
+            messages_from = Q(author=user_id, recipient=friend_id)
+            messages_to = Q(author=friend_id, recipient=user_id)
+            query = Message.objects.filter(messages_from | messages_to)
+            message_list = serializers.serialize('json', query)
+            data['streams'].append({'friend': friend_id.pk, 'messages': message_list})
+        print(data)
+        return HttpResponse(json.dumps(data), content_type='application/json')
     else:
         return HttpResponse(status=405)
 
