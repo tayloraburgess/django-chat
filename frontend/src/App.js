@@ -22,13 +22,37 @@ class App extends Component {
 
 const SPA = React.createClass({
     getInitialState: function() {
+        const tempUser = prompt('Enter a user pk.');
         return {
-            userPk: 3,
+            userPk: parseInt(tempUser),
             currentStream: 0,
             friendList: [],
             streamsDict: {},
-            userDict: {}
+            userDict: {},
+            socket: {}
         };
+    },
+
+    eventListen: function() {
+        const ws = new WebSocket('ws://localhost:8000');
+        ws.onmessage = (message) => {
+            const data = JSON.parse(message.data)
+            const newState = Object.assign({}, this.state.streamsDict);
+            newState[data.author].push(data.text)
+            this.setState({
+                streamsDict: newState, 
+            });
+        }
+        ws.onopen = () => {
+            const handshake = {
+                type: 'handshake',
+                user: this.state.userPk
+            }
+            ws.send(JSON.stringify(handshake));
+        }
+        this.setState({
+            socket: ws
+        });
     },
 
     componentDidMount: function() {
@@ -73,6 +97,7 @@ const SPA = React.createClass({
                 });  
             } 
         });
+        this.eventListen();
     },
 
     changeStream: function(userPk) {
@@ -90,10 +115,12 @@ const SPA = React.createClass({
         }
         return (
             <div>
+
+            <h1>{this.state.userDict[this.state.userPk]}</h1>
                 <Friends userDict={this.state.userDict} friendList={this.state.friendList} changeStream={this.changeStream}/>
                 <h3>{this.state.userDict[this.state.currentStream]}</h3>
                 <Messages messageList={messageList} />
-                <Write author={this.state.userPk} recipient={this.state.currentStream} />
+                <Write socket={this.state.socket} author={this.state.userPk} recipient={this.state.currentStream} />
             </div>
         );
     } 
@@ -123,11 +150,13 @@ const Write = React.createClass({
 
     postMessage: function(event) {
         const data = {
+            type: 'message',
             text: this.state.text,
             date_sent: Date.now(),
             author: this.props.author,
             recipient: this.props.recipient
         }
+        this.props.socket.send(JSON.stringify(data));
         event.preventDefault();
         $.ajax({
             type: 'POST',
@@ -135,7 +164,6 @@ const Write = React.createClass({
             contentType: 'application/json',
             data: JSON.stringify(data),
             success: (res) => {
-                console.log('success');
                 this.setState({
                     text: ''
                 });
