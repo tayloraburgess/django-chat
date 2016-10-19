@@ -86,6 +86,7 @@ const SPA = React.createClass({
             <div>
                 <Friends friendList={this.state.friendList} changeStream={this.changeStream}/>
                 <Messages messageList={messageList} />
+                <Write author={this.state.userPk} recipient={this.state.currentStream} />
             </div>
         );
     } 
@@ -105,6 +106,46 @@ const Messages = React.createClass({
         );
     }
 });
+
+const Write = React.createClass({
+    getInitialState: function() {
+        return {
+            text: ''
+        };
+    },
+
+    postMessage: function(event) {
+        const data = {
+            text: this.state.text,
+            date_sent: Date.now(),
+            author: this.props.author,
+            recipient: this.props.recipient
+        }
+        event.preventDefault();
+        $.ajax({
+            type: 'POST',
+            url: 'api/v1/messages/',
+            contentType: 'application/json',
+            dataType: 'json',
+            data: JSON.stringify(data),
+        })
+    },
+
+    editMessage: function(event) {
+        this.setState({
+            text: event.target.value
+        })
+    },
+
+    render: function() {
+        return (
+            <form onSubmit={this.postMessage}>
+                <textarea onChange={this.editMessage} />
+                <button type='submit'>Send Message</button>
+            </form>
+        )
+    }
+})
 
 const Friends = React.createClass({
     render: function() {
