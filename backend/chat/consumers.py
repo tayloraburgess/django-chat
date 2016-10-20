@@ -2,7 +2,7 @@ import json
 
 from channels import Group
 
-from messages.models import Message
+from api.models import Message
 from django.contrib.auth.models import User
 
 def message(message):

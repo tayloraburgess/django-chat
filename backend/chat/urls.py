@@ -23,6 +23,5 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^login/$', auth_views.login, {'template_name': 'login.html'}, name='login'),
     url(r'^new_user/$', views.new_user, name='new_user'),
-    url(r'^api/v1/messages/', include('messages.urls')),
-    url(r'^api/v1/users/', include('users.urls')),
+    url(r'^api/v1/', include('api.urls')),
 ]

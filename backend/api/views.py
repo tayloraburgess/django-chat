@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt 
 
-from messages.models import Message
+from .models import Message
 from django.contrib.auth.models import User
 from django.db.models import Q
 
