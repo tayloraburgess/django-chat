@@ -22,9 +22,8 @@ class App extends Component {
 
 const SPA = React.createClass({
     getInitialState: function() {
-        const tempUser = prompt('Enter a user pk.');
         return {
-            userPk: parseInt(tempUser),
+            userPk: 0, 
             currentStream: 0,
             streamsDict: {},
             userDict: {},
@@ -63,10 +62,11 @@ const SPA = React.createClass({
     },
 
     componentDidMount: function() {
-        $.ajax({
-            type: 'GET',
-            url: 'api/v1/users/',
-            success: (res) => {
+        $.get('api/v1/users/get', (userRes) => {
+            this.setState({
+                userPk: userRes.pk
+            });
+            $.get('api/v1/users', (res) => {
                 const users = {};
                 res.forEach((user) => {
                     users[user.pk] = user.fields.username;
@@ -74,24 +74,20 @@ const SPA = React.createClass({
                 this.setState({
                     userDict: users
                 });
-            }
-        });
-       const streamURL = `/api/v1/users/${this.state.userPk}/streams/`;
-       $.ajax({
-           type: 'GET',
-           url: streamURL,
-           success: (res) => {
-               const streamsDict = {}; 
-               res.streams.forEach((stream) => {
+            });
+            const streamURL = `/api/v1/users/${this.state.userPk}/streams/`;
+            $.get(streamURL, (res) => {
+                const streamsDict = {}; 
+                res.streams.forEach((stream) => {
                    console.log(stream);
                    streamsDict[stream.friend] = getMessageList(JSON.parse(stream.messages));
-               });
-               this.setState({
+                });
+                this.setState({
                    streamsDict: streamsDict, 
                    currentStream: Object.keys(streamsDict)[0]
-               });
-            }
-       });
+                });
+            });
+        });
         this.sockets();
     },
 
