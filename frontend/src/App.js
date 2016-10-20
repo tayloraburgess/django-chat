@@ -125,6 +125,7 @@ const SPA = React.createClass({
         return (
             <div>
                 <h1>{this.state.userDict[this.state.userPk]}</h1>
+                <a href='localhost:8000/logout'>(Logout)</a>
                 <Users 
                     userDict={ this.state.userDict }
                     userList={ friendList }

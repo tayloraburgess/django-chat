@@ -57,6 +57,9 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'chat.urls'
 
+LOGIN_URL = '/'
+LOGIN_REDIRECT_URL = '/'
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -78,6 +81,7 @@ WSGI_APPLICATION = 'chat.wsgi.application'
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'asgi_redis.RedisChannelLayer',
+
         "CONFIG": {
             "hosts": [("localhost", 6379)],
         },

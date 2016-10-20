@@ -12,7 +12,6 @@ from django.db.models import Q
 def get_info(request):
     if request.method == 'GET':
         if request.user.is_authenticated:
-            print(request.user)
             data = {
                 'pk': request.user.pk 
             }
