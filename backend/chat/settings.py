@@ -20,13 +20,17 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '0npdj5o@5mcn0v+arfb2^-+v5)b8_q^@6@4pk@frahd*wom_ib'
+SECRET_KEY = os.environ['DJANGO_SECRET_KEY'] 
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1'
+]
 
 # Application definition
 
@@ -73,7 +77,10 @@ WSGI_APPLICATION = 'chat.wsgi.application'
 
 CHANNEL_LAYERS = {
     'default': {
-        'BACKEND': 'asgiref.inmemory.ChannelLayer',
+        'BACKEND': 'asgi_redis.RedisChannelLayer',
+        "CONFIG": {
+            "hosts": [("localhost", 6379)],
+        },
         'ROUTING': 'chat.routing.channel_routing',
     }    
 }
