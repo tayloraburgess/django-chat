@@ -9,6 +9,19 @@ from messages.models import Message
 from django.contrib.auth.models import User
 from django.db.models import Q
 
+def get_info(request):
+    if request.method == 'GET':
+        if request.user.is_authenticated:
+            print(request.user)
+            data = {
+                'pk': request.user.pk 
+            }
+            return HttpResponse(json.dumps(data), content_type='application/json')
+        else:
+            return HttpResponse(status=403)
+    else:
+        return HttpResponse(status=405)
+
 def all(request):
     if request.method == 'GET':
         query = User.objects.all()
