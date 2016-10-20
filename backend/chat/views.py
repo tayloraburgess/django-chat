@@ -7,7 +7,7 @@ from django.shortcuts import render, redirect
 
 @login_required(login_url='login/')
 def main(request):
-    return HttpResponse('home')
+    return render(request, 'index.html')
 
 def new_user(request):
     if request.method == 'POST':
