@@ -49,6 +49,7 @@ const SPA = React.createClass({
                 });
             }
         }
+
         ws.onopen = () => {
             const handshake = {
                 type: 'handshake',
@@ -75,6 +76,7 @@ const SPA = React.createClass({
                     userDict: users
                 });
             });
+
             const streamURL = `/api/v1/users/${this.state.userPk}/streams/`;
             $.get(streamURL, (res) => {
                 const streamsDict = {}; 
@@ -88,6 +90,7 @@ const SPA = React.createClass({
                 });
             });
         });
+
         this.sockets();
     },
 
@@ -121,17 +124,77 @@ const SPA = React.createClass({
 
         return (
             <div>
-
-            <h1>{this.state.userDict[this.state.userPk]}</h1>
-                <Friends userDict={this.state.userDict} friendList={friendList} changeStream={this.changeStream}/>
-            <hr />
-<Friends userDict={this.state.userDict} friendList={otherUsers} changeStream={this.changeStream}/>
-                <h3>{this.state.userDict[this.state.currentStream]}</h3>
-                <Messages messageList={messageList} />
-                <Write socket={this.state.socket} author={this.state.userPk} recipient={this.state.currentStream} />
+                <h1>{this.state.userDict[this.state.userPk]}</h1>
+                <Users 
+                    userDict={ this.state.userDict }
+                    userList={ friendList }
+                    changeStream={ this.changeStream }
+                />
+                <hr />
+                <Users
+                    userDict={ this.state.userDict }
+                    userList={ otherUsers }
+                    changeStream={ this.changeStream }
+                />
+                <h3>{ this.state.userDict[this.state.currentStream] }</h3>
+                <Messages messageList={ messageList } />
+                <Write
+                    socket={ this.state.socket }
+                    author={ this.state.userPk }
+                    recipient={ this.state.currentStream }
+                />
             </div>
         );
     } 
+});
+
+const Users = React.createClass({
+    render: function() {
+        const userComponents = this.props.userList.map((user) => {
+           return {
+               pk: user,
+               username: this.props.userDict[user]
+           };
+        }).map((data) => {
+           return (
+               <User
+                   data={data}
+                   changeStream={this.props.changeStream}
+               /> 
+            ); 
+        });
+        return (
+            <div>
+                <ul>
+                    { userComponents.map((component) => {
+                        return (
+                            <li>
+                                { component }
+                            </li>
+                        );
+                    })}
+                </ul>
+            </div>
+        );
+    }
+});
+
+const User = React.createClass({
+    render: function() {
+        const changeStream = () =>  {
+            this.props.changeStream(this.props.data.pk);
+        };
+        return (
+            <li>
+                <a
+                    href='#'
+                    onClick={changeStream}
+                >
+                    { this.props.data.username }
+                </a>
+            </li>
+        )
+    }
 });
 
 const Messages = React.createClass({
@@ -180,45 +243,17 @@ const Write = React.createClass({
 
     render: function() {
         return (
-            <form onSubmit={this.postMessage}>
-                <textarea onChange={this.editMessage} value={this.state.text} />
-                <button type='submit'>Send Message</button>
+            <form onSubmit={ this.postMessage }>
+                <textarea
+                    onChange={ this.editMessage }
+                    value={ this.state.text }
+                />
+                <button type='submit'>
+                    Send Message
+                </button>
             </form>
-        )
-    }
-})
-
-const Friends = React.createClass({
-    render: function() {
-        return (
-            <div>
-                <ul>
-                    {
-                       this.props.friendList.map((friend) => {
-                           const data = {
-                               pk: friend,
-                               username: this.props.userDict[friend]
-                           }
-                           return (
-                               <Friend data={data} changeStream={this.props.changeStream}/> 
-                            );
-                        })
-                    }
-                </ul>
-            </div>
         );
     }
 });
-
-const Friend = React.createClass({
-    render: function() {
-        const changeStream = () =>  {
-            this.props.changeStream(this.props.data.pk)
-        };
-        return (
-            <li> <a href="#" onClick={changeStream}>{ this.props.data.username }</a></li>
-        )
-    }
-})
 
 export default App;
