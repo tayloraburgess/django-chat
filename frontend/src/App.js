@@ -124,26 +124,37 @@ const SPA = React.createClass({
 
         return (
             <div>
-                <h1>{this.state.userDict[this.state.userPk]}</h1>
-                <a href='localhost:8000/logout'>(Logout)</a>
-                <Users 
-                    userDict={ this.state.userDict }
-                    userList={ friendList }
-                    changeStream={ this.changeStream }
-                />
-                <hr />
-                <Users
-                    userDict={ this.state.userDict }
-                    userList={ otherUsers }
-                    changeStream={ this.changeStream }
-                />
-                <h3>{ this.state.userDict[this.state.currentStream] }</h3>
-                <Messages messageList={ messageList } />
-                <Write
-                    socket={ this.state.socket }
-                    author={ this.state.userPk }
-                    recipient={ this.state.currentStream }
-                />
+                <div>
+                    <h1>hi, {this.state.userDict[this.state.userPk]}.</h1>
+                    <form action='http://127.0.0.1:8000/logout'>
+                        <button type='submit'>logout</button>
+                    </form>
+                </div>
+                <div className='flex-container'>
+                    <div className='flex-item-1'>
+                        <h3>friends:</h3>
+                        <Users 
+                            userDict={ this.state.userDict }
+                            userList={ friendList }
+                            changeStream={ this.changeStream }
+                        />
+                        <h3>other users:</h3>
+                        <Users
+                            userDict={ this.state.userDict }
+                            userList={ otherUsers }
+                            changeStream={ this.changeStream }
+                        />
+                    </div>
+                    <div className='flex-item-2'>
+                        <h3>your chats with { this.state.userDict[this.state.currentStream] }:</h3>
+                        <Messages messageList={ messageList } />
+                        <Write
+                            socket={ this.state.socket }
+                            author={ this.state.userPk }
+                            recipient={ this.state.currentStream }
+                        />
+                    </div>
+                </div>
             </div>
         );
     } 
