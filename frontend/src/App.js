@@ -6,7 +6,10 @@ import $ from 'jquery';
 
 function getMessageList(resObj) {
     return resObj.map((obj) => {
-        return obj.fields.text
+        return {
+            text: obj.fields.text,
+            author: obj.fields.author
+        }
     });
 }
 
@@ -31,19 +34,25 @@ const SPA = React.createClass({
         };
     },
 
-    sockets: function() {
+    sockets: function(userPk) {
         const ws = new WebSocket('ws://localhost:8000');
         ws.onmessage = (message) => {
             const data = JSON.parse(message.data)
             if (data.type === 'new_message') {
                 const newState = Object.assign({}, this.state.streamsDict);
-                newState[data.author].push(data.text)
+                newState[data.author].push({
+                    text: data.text,
+                    author: data.author
+                });
                 this.setState({
                     streamsDict: newState 
                 });
             } else if (data.type === 'message_echo') {
                 const newState = Object.assign({}, this.state.streamsDict);
-                newState[data.recipient].push(data.text)
+                newState[data.recipient].push({
+                    text: data.text,
+                    author: this.state.userPk
+                });
                 this.setState({
                     streamsDict: newState 
                 });
@@ -53,7 +62,7 @@ const SPA = React.createClass({
         ws.onopen = () => {
             const handshake = {
                 type: 'handshake',
-                user: this.state.userPk
+                user: userPk
             }
             ws.send(JSON.stringify(handshake));
         }
@@ -64,6 +73,7 @@ const SPA = React.createClass({
 
     componentDidMount: function() {
         $.get('api/v1/users/get', (userRes) => {
+            this.sockets(userRes.pk);
             this.setState({
                 userPk: userRes.pk
             });
@@ -81,7 +91,6 @@ const SPA = React.createClass({
             $.get(streamURL, (res) => {
                 const streamsDict = {}; 
                 res.streams.forEach((stream) => {
-                   console.log(stream);
                    streamsDict[stream.friend] = getMessageList(JSON.parse(stream.messages));
                 });
                 this.setState({
@@ -90,8 +99,6 @@ const SPA = React.createClass({
                 });
             });
         });
-
-        this.sockets();
     },
 
     changeStream: function(userPk) {
@@ -130,15 +137,16 @@ const SPA = React.createClass({
                         <button type='submit'>logout</button>
                     </form>
                 </div>
+                <br />
                 <div className='flex-container'>
                     <div className='flex-item-1'>
-                        <h3>friends:</h3>
+                        <h2>friends</h2>
                         <Users 
                             userDict={ this.state.userDict }
                             userList={ friendList }
                             changeStream={ this.changeStream }
                         />
-                        <h3>other users:</h3>
+                        <h2>other users</h2>
                         <Users
                             userDict={ this.state.userDict }
                             userList={ otherUsers }
@@ -146,8 +154,11 @@ const SPA = React.createClass({
                         />
                     </div>
                     <div className='flex-item-2'>
-                        <h3>your chats with { this.state.userDict[this.state.currentStream] }:</h3>
-                        <Messages messageList={ messageList } />
+                        <h2>chat with { this.state.userDict[this.state.currentStream] }</h2>
+                        <Messages
+                            messageList={ messageList }
+                            userPk={ this.state.userPk }
+                        />
                         <Write
                             socket={ this.state.socket }
                             author={ this.state.userPk }
@@ -176,7 +187,7 @@ const Users = React.createClass({
             ); 
         });
         return (
-            <div>
+            <div className="splits">
                 <ul>
                     { userComponents.map((component) => {
                         return (
@@ -197,14 +208,12 @@ const User = React.createClass({
             this.props.changeStream(this.props.data.pk);
         };
         return (
-            <li>
-                <a
-                    href='#'
-                    onClick={changeStream}
-                >
-                    { this.props.data.username }
-                </a>
-            </li>
+            <a
+                href='#'
+                onClick={changeStream}
+            >
+                { this.props.data.username }
+            </a>
         )
     }
 });
@@ -212,10 +221,14 @@ const User = React.createClass({
 const Messages = React.createClass({
     render: function() {
         const messages = this.props.messageList.map((message) => {
-            return (<li> { message } </li>);
+            if (message.author === this.props.userPk) {
+                return (<li className='from-user'> { message.text } </li>);
+            } else {
+                return (<li className='from-other'> { message.text } </li>);
+            }
         });
         return (
-            <div>
+            <div className='splits'>
                 <ul>
                     { messages }
                 </ul>
@@ -255,15 +268,17 @@ const Write = React.createClass({
 
     render: function() {
         return (
-            <form onSubmit={ this.postMessage }>
-                <textarea
-                    onChange={ this.editMessage }
-                    value={ this.state.text }
-                />
-                <button type='submit'>
-                    Send Message
-                </button>
-            </form>
+            <div className='send-message'>
+                <form onSubmit={ this.postMessage }>
+                    <textarea
+                        onChange={ this.editMessage }
+                        value={ this.state.text }
+                    />
+                    <button className='message-button' type='submit'>
+                        send message
+                    </button>
+                </form>
+            </div>
         );
     }
 });

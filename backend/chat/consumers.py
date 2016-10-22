@@ -17,7 +17,7 @@ def message(message):
             recipient=User.objects.get(pk=data['recipient'])
         )
         new_message.save()
-         
+        
         broadcast = {
             'type': 'new_message',
             'author': data['author'],

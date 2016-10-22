@@ -32,6 +32,7 @@ button {
      font-family: Futura;
      color: #2A3035;
      display: block;
+     outline: none;
 }
 div.flex-container {
     display: -webkit-flex;
@@ -40,13 +41,38 @@ div.flex-container {
 
 div.flex-item-1 {
     width: 35%;
+    margin: 15px;
 }
 
 div.flex-item-2 {
     width: 65%;
+    margin: 15px;
 }
 
 ul {
     list-style-type: none;
     padding: 0px;
- } 
+} 
+
+li.from-user {
+    text-align: right;
+}
+
+button.message-button {
+    margin-left: auto;
+    margin-right: 0px;
+}
+
+div.send-message {
+    float: right;
+}
+
+div.splits {
+    border: #8C9AA5;
+    border-style: solid;
+    border-width: 1px;
+    border-right-width: 0px;
+    border-left-width: 0px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
