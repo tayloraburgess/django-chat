@@ -17,7 +17,8 @@ function getMessageList(resObj) {
         return {
             text: obj.fields.text,
             author: obj.fields.author,
-            date_sent: obj.fields.date_sent
+            date_sent: obj.fields.date_sent,
+            read: obj.fields.read
         }
     });
     return sortMessages(messageList);
@@ -56,18 +57,21 @@ const SPA = React.createClass({
             const data = JSON.parse(message.data)
             if (data.type === 'new_message') {
                 const newState = Object.assign({}, this.state.streamsDict);
-                newState[data.author].push({
+                newState[data.author].messages.push({
                     text: data.text,
-                    author: data.author
+                    author: data.author,
+                    read: data.read
                 });
+                newState[data.author].read = false;
                 this.setState({
                     streamsDict: newState 
                 });
             } else if (data.type === 'message_echo') {
                 const newState = Object.assign({}, this.state.streamsDict);
-                newState[data.recipient].push({
+                newState[data.recipient].messages.push({
                     text: data.text,
-                    author: this.state.userPk
+                    author: this.state.userPk,
+                    read: true
                 });
                 this.setState({
                     streamsDict: newState 
@@ -107,7 +111,10 @@ const SPA = React.createClass({
             $.get(streamURL, (res) => {
                 const streamsDict = {}; 
                 res.streams.forEach((stream) => {
-                   streamsDict[stream.friend] = getMessageList(JSON.parse(stream.messages));
+                    streamsDict[stream.friend] = {
+                        messages: getMessageList(JSON.parse(stream.messages)),
+                        read: stream.read
+                    };
                 });
                 this.setState({
                    streamsDict: streamsDict, 
@@ -129,7 +136,7 @@ const SPA = React.createClass({
         if (Object.keys(this.state.streamsDict).length > 0) {
             const currentStream = this.state.streamsDict[this.state.currentStream];
             if (currentStream) {
-                messageList = currentStream;
+                messageList = currentStream.messages;
             } else {
                 messageList = [];
             }
@@ -159,6 +166,7 @@ const SPA = React.createClass({
                         <h2>friends</h2>
                         <Users 
                             userDict={ this.state.userDict }
+                            streamsDict={ this.state.streamsDict }  
                             userList={ friendList }
                             changeStream={ this.changeStream }
                             id='friends'
@@ -166,6 +174,7 @@ const SPA = React.createClass({
                         <h2>other users</h2>
                         <Users
                             userDict={ this.state.userDict }
+                            streamsDict={ this.state.streamsDict }
                             userList={ otherUsers }
                             changeStream={ this.changeStream }
                             id='other-users'
@@ -192,10 +201,17 @@ const SPA = React.createClass({
 const Users = React.createClass({
     render: function() {
         const userComponents = this.props.userList.map((user) => {
+           let read = true;
+           if (this.props.streamsDict[user]) {
+               read = false;
+           } 
            return {
                pk: user,
-               username: this.props.userDict[user]
+               username: this.props.userDict[user],
+               read: read 
            };
+        }).sort((a, b) => {
+           return a.read === true ? -1 : 1 
         }).map((data) => {
            return (
                <User
@@ -225,12 +241,17 @@ const User = React.createClass({
         const changeStream = () =>  {
             this.props.changeStream(this.props.data.pk);
         };
+        let notification = "";
+        if (this.props.data.read === false) {
+            notification = "[ ! ] "; 
+        } 
         return (
             <a
                 href='#'
                 onClick={changeStream}
             >
-                { this.props.data.username }
+            { notification }
+            { this.props.data.username }
             </a>
         )
     }

@@ -49,8 +49,18 @@ def streams(request, user_id):
                 messages_from = Q(author=user_id, recipient=friend_id)
                 messages_to = Q(author=friend_id, recipient=user_id)
                 query = Message.objects.filter(messages_from | messages_to)
+                messages_read = True;
+                for v in query.values():
+                    print(messages_read)
+                    if v['read'] == False:
+                        messages_read = False;
+                        break
                 message_list = serializers.serialize('json', query)
-                data['streams'].append({'friend': friend_id.pk, 'messages': message_list})
+                data['streams'].append({
+                    'friend': friend_id.pk,
+                    'messages': message_list,
+                    'read': messages_read
+                })
             return HttpResponse(json.dumps(data), content_type='application/json')
         else:
             return HttpResponse(status=FORBIDDEN)
