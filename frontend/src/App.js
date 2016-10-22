@@ -4,13 +4,21 @@ import './App.css';
 
 import $ from 'jquery';
 
+function sortMessages(messageList) {
+    return messageList.sort((a, b) => {
+       return a.date_sent <= b.date_sent ? -1 :1;  
+    });
+}
+
 function getMessageList(resObj) {
-    return resObj.map((obj) => {
+    const messageList = resObj.map((obj) => {
         return {
             text: obj.fields.text,
-            author: obj.fields.author
+            author: obj.fields.author,
+            date_sent: obj.fields.date_sent
         }
     });
+    return sortMessages(messageList);
 }
 
 class App extends Component {
