@@ -1,6 +1,6 @@
 body {
     padding: 25px;
-    font-family: Futura;
+    font-family: Futura, sans-serif;
     background: #2A3035;
     color: #8C9AA5;
     border: 1px;
@@ -9,30 +9,32 @@ body {
     border-style: solid;
 }
 
- a {
-     color: #B1C5D6;
-     text-decoration: none;
- }
+a {
+    color: #B1C5D6;
+    text-decoration: none;
+}
 
- textarea {
-     resize: none;
-     background: #5A6066;
-     border: none;
-     color: #B1C5D6;
-     font-size: small;
-     font-family: Futura;
-     padding: 10px;
-     outline: none;
- }
+textarea {
+    resize: none;
+    background: #5A6066;
+    border: none;
+    color: #B1C5D6;
+    font-size: small;
+    font-family: Futura, sans-serif;
+    padding: 10px;
+    outline: none;
+    width: 270px;
+    height: 75px;
+}
 
 button {
-     border: none;
-     background: #8C9AA5;
-     font-size: small;
-     font-family: Futura;
-     color: #2A3035;
-     display: block;
-     outline: none;
+    border: none;
+    background: #8C9AA5;
+    font-size: small;
+    font-family: Futura, sans-serif;
+    color: #2A3035;
+    display: block;
+    outline: none;
 }
 div.flex-container {
     display: -webkit-flex;
@@ -42,11 +44,13 @@ div.flex-container {
 div.flex-item-1 {
     width: 35%;
     margin: 15px;
+    margin-left: 0px;
 }
 
 div.flex-item-2 {
     width: 65%;
     margin: 15px;
+    margin-right: 0px;
 }
 
 ul {
@@ -75,4 +79,27 @@ div.splits {
     border-left-width: 0px;
     margin-top: 5px;
     margin-bottom: 10px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+div#messages {
+    height: 250px;
+}
+
+div#friends {
+    height: 177px;
+}
+
+div#other-users {
+    height: 103px;
+}
+
+div.splits::-webkit-scrollbar {
+    background-color: #2A3035; 
+    width: 10px;
+}
+
+div.splits::-webkit-scrollbar-thumb {
+    background-color: #B1C5D6; 
 }

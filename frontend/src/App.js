@@ -153,12 +153,14 @@ const SPA = React.createClass({
                             userDict={ this.state.userDict }
                             userList={ friendList }
                             changeStream={ this.changeStream }
+                            id='friends'
                         />
                         <h2>other users</h2>
                         <Users
                             userDict={ this.state.userDict }
                             userList={ otherUsers }
                             changeStream={ this.changeStream }
+                            id='other-users'
                         />
                     </div>
                     <div className='flex-item-2'>
@@ -195,7 +197,7 @@ const Users = React.createClass({
             ); 
         });
         return (
-            <div className="splits">
+            <div className="splits" id={ this.props.id }>
                 <ul>
                     { userComponents.map((component) => {
                         return (
@@ -236,7 +238,7 @@ const Messages = React.createClass({
             }
         });
         return (
-            <div className='splits'>
+            <div className='splits' id='messages'>
                 <ul>
                     { messages }
                 </ul>
