@@ -4,6 +4,8 @@ import './App.css';
 
 import $ from 'jquery';
 
+const DEV = true;
+
 function sortMessages(messageList) {
     return messageList.sort((a, b) => {
        return a.date_sent <= b.date_sent ? -1 :1;  
@@ -43,7 +45,13 @@ const SPA = React.createClass({
     },
 
     sockets: function(userPk) {
-        const ws = new WebSocket('ws://localhost:8000');
+        let socketURI;
+        if (DEV) {
+            socketURI = 'ws://localhost:8000';
+        } else {
+            socketURI = `ws://${location.host}`
+        }
+        const ws = new WebSocket(socketURI);
         ws.onmessage = (message) => {
             const data = JSON.parse(message.data)
             if (data.type === 'new_message') {
@@ -95,7 +103,7 @@ const SPA = React.createClass({
                 });
             });
 
-            const streamURL = `/api/v1/users/${this.state.userPk}/streams/`;
+            const streamURL = `api/v1/users/${this.state.userPk}/streams/`;
             $.get(streamURL, (res) => {
                 const streamsDict = {}; 
                 res.streams.forEach((stream) => {
@@ -131,7 +139,7 @@ const SPA = React.createClass({
             friendList = [];
         }       
         const otherUsers = Object.keys(this.state.userDict).filter((user) => {
-            if (friendList.indexOf(user) === -1 && user !== this.state.userPk) {
+            if (friendList.indexOf(user) === -1 && parseInt(user) !== this.state.userPk) {
                 return true; 
             }
             return false;
@@ -141,7 +149,7 @@ const SPA = React.createClass({
             <div>
                 <div>
                     <h1>hi, {this.state.userDict[this.state.userPk]}.</h1>
-                    <form action='http://127.0.0.1:8000/logout'>
+                    <form action='logout/'>
                         <button type='submit'>logout</button>
                     </form>
                 </div>
@@ -231,7 +239,6 @@ const User = React.createClass({
 const Messages = React.createClass({
 
     componentDidUpdate: function() {
-        console.log('updating!');
         this.refs.messagesDiv.scrollTop = this.refs.messagesDiv.scrollHeight;
     },
 
