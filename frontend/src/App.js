@@ -229,6 +229,12 @@ const User = React.createClass({
 });
 
 const Messages = React.createClass({
+
+    componentDidUpdate: function() {
+        console.log('updating!');
+        this.refs.messagesDiv.scrollTop = this.refs.messagesDiv.scrollHeight;
+    },
+
     render: function() {
         const messages = this.props.messageList.map((message) => {
             if (message.author === this.props.userPk) {
@@ -238,7 +244,7 @@ const Messages = React.createClass({
             }
         });
         return (
-            <div className='splits' id='messages'>
+            <div className='splits' id='messages' ref='messagesDiv'>
                 <ul>
                     { messages }
                 </ul>
