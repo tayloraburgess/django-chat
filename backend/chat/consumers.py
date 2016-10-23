@@ -7,7 +7,6 @@ from django.contrib.auth.models import User
 
 def message(message):
     data = json.loads(message.content['text'])
-    print(data)
     if (data['type'] == 'handshake'):
         Group(str(data['user'])).add(message.reply_channel)
     elif (data['type'] == 'message'):

@@ -194,7 +194,7 @@ const SPA = React.createClass({
         return (
             <div>
                 <div>
-                    <h1>hi, {this.state.userDict[this.state.userPk]}.</h1>
+                    <h1>hi, {this.state.userDict[this.state.userPk]}</h1>
                     <form action='logout/'>
                         <button type='submit'>logout</button>
                     </form>
@@ -276,13 +276,13 @@ const User = React.createClass({
             notification = "[ ! ] "; 
         } 
         return (
-            <a
-                href='#'
+            <span
+                className='fake-link'
                 onClick={ changeStream }
             >
             { notification }
             { this.props.data.username }
-            </a>
+            </span>
         )
     }
 });

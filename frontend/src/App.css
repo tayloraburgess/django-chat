@@ -9,11 +9,13 @@ body {
     border-style: solid;
 }
 
-a {
+span.fake-link {
     color: #B1C5D6;
-    text-decoration: none;
 }
 
+span.fake-link:hover {
+    cursor: pointer;
+}
 textarea {
     resize: none;
     background: #5A6066;
