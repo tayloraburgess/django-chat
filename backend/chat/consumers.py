@@ -36,7 +36,7 @@ def message(message):
         message.reply_channel.send({
             'text': json.dumps(reply) 
         })
-    elif (data['type'] == 'stream_read'):
+    elif (data['type'] == 'messages_read'):
         author = data['author']
         recipient = data['recipient']
         query = Message.objects.filter(author=author, recipient=recipient)

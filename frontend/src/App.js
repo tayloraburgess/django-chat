@@ -138,7 +138,7 @@ const SPA = React.createClass({
             streamsDict: newState 
         });
         const message = {
-            type: 'stream_read',
+            type: 'messages_read',
             author: userStream,
             recipient: this.state.userPk 
         } 
@@ -226,7 +226,9 @@ const Users = React.createClass({
                read: read 
            };
         }).sort((a, b) => {
-           return a.read === true ? -1 : 1 
+           return a > b ? -1 : 1
+        }).sort((a, b) => {
+           return a.read ? 1 : -1 
         }).map((data) => {
            return (
                <User
