@@ -57,6 +57,12 @@ const SPA = React.createClass({
             const data = JSON.parse(message.data)
             if (data.type === 'new_message') {
                 const newState = Object.assign({}, this.state.streamsDict);
+                if (!newState[data.recipient]) {
+                    newState[data.recipient] = {
+                        messages: [],
+                        read: false
+                    } 
+                }
                 newState[data.author].messages.push({
                     text: data.text,
                     author: data.author,
@@ -68,6 +74,12 @@ const SPA = React.createClass({
                 });
             } else if (data.type === 'message_echo') {
                 const newState = Object.assign({}, this.state.streamsDict);
+                if (!newState[data.recipient]) {
+                    newState[data.recipient] = {
+                        messages: [],
+                        read: true
+                    } 
+                }
                 newState[data.recipient].messages.push({
                     text: data.text,
                     author: this.state.userPk,
@@ -132,17 +144,19 @@ const SPA = React.createClass({
     },
 
     readStream: function(userStream) {
-        const newState = Object.assign({}, this.state.streamsDict);
-        newState[userStream].read = true;
-        this.setState({
-            streamsDict: newState 
-        });
-        const message = {
-            type: 'messages_read',
-            author: userStream,
-            recipient: this.state.userPk 
-        } 
-        this.state.socket.send(JSON.stringify(message));
+        if (this.state.streamsDict[userStream]) {
+            const newState = Object.assign({}, this.state.streamsDict);
+            newState[userStream].read = true;
+            this.setState({
+                streamsDict: newState 
+            });
+            const message = {
+                type: 'messages_read',
+                author: userStream,
+                recipient: this.state.userPk 
+            } 
+            this.state.socket.send(JSON.stringify(message));
+        }
     },
 
     render: function() {
