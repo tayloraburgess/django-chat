@@ -104,7 +104,7 @@ const SPA = React.createClass({
     },
 
     componentDidMount: function() {
-        $.get('api/v1/users/get', (userRes) => {
+        $.get('api/v1/users/current', (userRes) => {
             this.sockets(userRes.pk);
             this.setState({
                 userPk: userRes.pk

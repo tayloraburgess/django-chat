@@ -12,7 +12,7 @@ from django.db.models import Q
 FORBIDDEN = 403
 METHOD_NOT_ALLOWED = 405
 
-def get_info(request):
+def current_user(request):
     if request.method == 'GET':
         if request.user.is_authenticated:
             data = {
