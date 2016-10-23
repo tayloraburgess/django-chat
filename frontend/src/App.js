@@ -57,8 +57,8 @@ const SPA = React.createClass({
             const data = JSON.parse(message.data)
             if (data.type === 'new_message') {
                 const newState = Object.assign({}, this.state.streamsDict);
-                if (!newState[data.recipient]) {
-                    newState[data.recipient] = {
+                if (!newState[data.author]) {
+                    newState[data.author] = {
                         messages: [],
                         read: false
                     } 
@@ -130,7 +130,6 @@ const SPA = React.createClass({
                 });
                 this.setState({
                    streamsDict: streamsDict, 
-                   currentStream: Object.keys(streamsDict)[0]
                 });
             });
         });
@@ -160,27 +159,38 @@ const SPA = React.createClass({
     },
 
     render: function() {
-        let messageList;
-        let friendList;
+        let messageList = [];
+        let friendList = [];
         if (Object.keys(this.state.streamsDict).length > 0) {
-            const currentStream = this.state.streamsDict[this.state.currentStream];
-            if (currentStream) {
-                messageList = currentStream.messages;
-            } else {
-                messageList = [];
-            }
             friendList = Object.keys(this.state.streamsDict);
-        } else {
-            messageList = [];
-            friendList = [];
-        }       
+        }     
         const otherUsers = Object.keys(this.state.userDict).filter((user) => {
             if (friendList.indexOf(user) === -1 && parseInt(user) !== this.state.userPk) {
                 return true; 
             }
             return false;
         });
-
+        let messages;
+        if (this.state.currentStream > 0) {
+            const currentStream = this.state.streamsDict[this.state.currentStream];
+            if (currentStream) {
+                messageList = currentStream.messages;
+            }
+            messages = (
+                <div className='flex-item-2'>
+                    <h2>chat with { this.state.userDict[this.state.currentStream] }</h2>
+                    <Messages
+                        messageList={ messageList }
+                        userPk={ this.state.userPk }
+                    />
+                    <Write
+                        socket={ this.state.socket }
+                        author={ this.state.userPk }
+                        recipient={ this.state.currentStream }
+                    />
+                </div>
+            );
+        }
         return (
             <div>
                 <div>
@@ -209,18 +219,7 @@ const SPA = React.createClass({
                             id='other-users'
                         />
                     </div>
-                    <div className='flex-item-2'>
-                        <h2>chat with { this.state.userDict[this.state.currentStream] }</h2>
-                        <Messages
-                            messageList={ messageList }
-                            userPk={ this.state.userPk }
-                        />
-                        <Write
-                            socket={ this.state.socket }
-                            author={ this.state.userPk }
-                            recipient={ this.state.currentStream }
-                        />
-                    </div>
+                    { messages } 
                 </div>
             </div>
         );
