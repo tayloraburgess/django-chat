@@ -127,7 +127,22 @@ const SPA = React.createClass({
     changeStream: function(userPk) {
         this.setState({
             currentStream: userPk 
-       });
+        });
+        this.readStream(userPk);
+    },
+
+    readStream: function(userStream) {
+        const newState = Object.assign({}, this.state.streamsDict);
+        newState[userStream].read = true;
+        this.setState({
+            streamsDict: newState 
+        });
+        const message = {
+            type: 'stream_read',
+            author: userStream,
+            recipient: this.state.userPk 
+        } 
+        this.state.socket.send(JSON.stringify(message));
     },
 
     render: function() {
@@ -203,7 +218,7 @@ const Users = React.createClass({
         const userComponents = this.props.userList.map((user) => {
            let read = true;
            if (this.props.streamsDict[user]) {
-               read = false;
+               read = this.props.streamsDict[user].read;
            } 
            return {
                pk: user,
@@ -215,8 +230,8 @@ const Users = React.createClass({
         }).map((data) => {
            return (
                <User
-                   data={data}
-                   changeStream={this.props.changeStream}
+                   data={ data }
+                   changeStream={ this.props.changeStream }
                /> 
             ); 
         });
@@ -248,7 +263,7 @@ const User = React.createClass({
         return (
             <a
                 href='#'
-                onClick={changeStream}
+                onClick={ changeStream }
             >
             { notification }
             { this.props.data.username }

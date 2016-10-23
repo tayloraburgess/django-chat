@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 
 def message(message):
     data = json.loads(message.content['text'])
+    print(data)
     if (data['type'] == 'handshake'):
         Group(str(data['user'])).add(message.reply_channel)
     elif (data['type'] == 'message'):
@@ -35,4 +36,10 @@ def message(message):
         message.reply_channel.send({
             'text': json.dumps(reply) 
         })
-
+    elif (data['type'] == 'stream_read'):
+        author = data['author']
+        recipient = data['recipient']
+        query = Message.objects.filter(author=author, recipient=recipient)
+        for message in query:
+            message.read = True
+            message.save()

@@ -48,14 +48,14 @@ def streams(request, user_id):
             for friend_id in friends:
                 messages_from = Q(author=user_id, recipient=friend_id)
                 messages_to = Q(author=friend_id, recipient=user_id)
-                query = Message.objects.filter(messages_from | messages_to)
+                query_1 = Message.objects.filter(messages_to)
                 messages_read = True;
-                for v in query.values():
-                    print(messages_read)
+                for v in query_1.values():
                     if v['read'] == False:
                         messages_read = False;
                         break
-                message_list = serializers.serialize('json', query)
+                query_2 = Message.objects.filter(messages_from | messages_to)
+                message_list = serializers.serialize('json', query_2)
                 data['streams'].append({
                     'friend': friend_id.pk,
                     'messages': message_list,
