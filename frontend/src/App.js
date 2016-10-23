@@ -170,6 +170,23 @@ const SPA = React.createClass({
             }
             return false;
         });
+        let friends;
+        let usersText = 'users';
+        if (friendList.length > 0) {
+            friends = (
+                <div>
+                    <h2>friends</h2>
+                    <Users 
+                        userDict={ this.state.userDict }
+                        streamsDict={ this.state.streamsDict }  
+                        userList={ friendList }
+                        changeStream={ this.changeStream }
+                        id='friends'
+                    />
+                </div>
+            );
+            usersText = 'other users';
+        }
         let messages;
         if (this.state.currentStream > 0) {
             const currentStream = this.state.streamsDict[this.state.currentStream];
@@ -202,15 +219,8 @@ const SPA = React.createClass({
                 <br />
                 <div className='flex-container'>
                     <div className='flex-item-1'>
-                        <h2>friends</h2>
-                        <Users 
-                            userDict={ this.state.userDict }
-                            streamsDict={ this.state.streamsDict }  
-                            userList={ friendList }
-                            changeStream={ this.changeStream }
-                            id='friends'
-                        />
-                        <h2>other users</h2>
+                        { friends }
+                        <h2>{ usersText }</h2>
                         <Users
                             userDict={ this.state.userDict }
                             streamsDict={ this.state.streamsDict }
