@@ -1,23 +1,11 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
+import React from 'react';
 import './App.css';
 
 import $ from 'jquery';
 
 const DEV = true;
 
-class App extends Component {
-    render() {
-        return (
-            <div>
-                <SPA />
-            </div>
-        );
-    }
-}
-
-const SPA = React.createClass({
-
+const App = React.createClass({
 	_sortMessages: function(messageList) {
 	    return messageList.sort((a, b) => {
 	       return a.date_sent <= b.date_sent ? -1 :1;  
@@ -47,6 +35,43 @@ const SPA = React.createClass({
     },
 
     sockets: function(userPk) {
+    	function newMessage(data) {
+    		const newState = Object.assign({}, this.state.streamsDict);
+            if (!newState[data.author]) {
+                newState[data.author] = {
+                    messages: [],
+                    read: false
+                } 
+            }
+            newState[data.author].messages.push({
+                text: data.text,
+                author: data.author,
+                read: data.read
+            });
+            newState[data.author].read = false;
+            this.setState({
+                streamsDict: newState 
+            });
+    	}
+
+    	function messageEcho(data) {
+    		const newState = Object.assign({}, this.state.streamsDict);
+            if (!newState[data.recipient]) {
+                newState[data.recipient] = {
+                    messages: [],
+                    read: true
+                } 
+            }
+            newState[data.recipient].messages.push({
+                text: data.text,
+                author: this.state.userPk,
+                read: true
+            });
+            this.setState({
+                streamsDict: newState 
+            });
+    	}
+
         let socketURI;
         if (DEV) {
             socketURI = 'ws://localhost:8000';
@@ -55,40 +80,11 @@ const SPA = React.createClass({
         }
         const ws = new WebSocket(socketURI);
         ws.onmessage = (message) => {
-            const data = JSON.parse(message.data)
-            if (data.type === 'new_message') {
-                const newState = Object.assign({}, this.state.streamsDict);
-                if (!newState[data.author]) {
-                    newState[data.author] = {
-                        messages: [],
-                        read: false
-                    } 
-                }
-                newState[data.author].messages.push({
-                    text: data.text,
-                    author: data.author,
-                    read: data.read
-                });
-                newState[data.author].read = false;
-                this.setState({
-                    streamsDict: newState 
-                });
-            } else if (data.type === 'message_echo') {
-                const newState = Object.assign({}, this.state.streamsDict);
-                if (!newState[data.recipient]) {
-                    newState[data.recipient] = {
-                        messages: [],
-                        read: true
-                    } 
-                }
-                newState[data.recipient].messages.push({
-                    text: data.text,
-                    author: this.state.userPk,
-                    read: true
-                });
-                this.setState({
-                    streamsDict: newState 
-                });
+            const messageData = JSON.parse(message.data)
+            if (messageData.type === 'new_message') {
+                newMessage.call(this, messageData)
+            } else if (messageData.type === 'message_echo') {
+                messageEcho.call(this, messageData)
             }
         }
 
@@ -99,6 +95,7 @@ const SPA = React.createClass({
             }
             ws.send(JSON.stringify(handshake));
         }
+
         this.setState({
             socket: ws
         });
