@@ -1,5 +1,5 @@
-from channels.routing import route
-
+from channels.routing import route_class
+from .consumers import WsMessage
 channel_routing = [
-    route('websocket.receive', 'chat.consumers.ws_message'),
+    route_class(WsMessage),
 ]
