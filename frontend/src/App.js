@@ -6,24 +6,6 @@ import $ from 'jquery';
 
 const DEV = true;
 
-function sortMessages(messageList) {
-    return messageList.sort((a, b) => {
-       return a.date_sent <= b.date_sent ? -1 :1;  
-    });
-}
-
-function getMessageList(resObj) {
-    const messageList = resObj.map((obj) => {
-        return {
-            text: obj.fields.text,
-            author: obj.fields.author,
-            date_sent: obj.fields.date_sent,
-            read: obj.fields.read
-        }
-    });
-    return sortMessages(messageList);
-}
-
 class App extends Component {
     render() {
         return (
@@ -35,6 +17,25 @@ class App extends Component {
 }
 
 const SPA = React.createClass({
+
+	_sortMessages: function(messageList) {
+	    return messageList.sort((a, b) => {
+	       return a.date_sent <= b.date_sent ? -1 :1;  
+	    });
+	},
+
+	_getMessageList: function(resObj) {
+	    const messageList = resObj.map((obj) => {
+	        return {
+	            text: obj.fields.text,
+	            author: obj.fields.author,
+	            date_sent: obj.fields.date_sent,
+	            read: obj.fields.read
+	        }
+	    });
+	    return this._sortMessages(messageList);
+	},
+
     getInitialState: function() {
         return {
             userPk: 0, 
@@ -124,7 +125,7 @@ const SPA = React.createClass({
                 const streamsDict = {}; 
                 res.streams.forEach((stream) => {
                     streamsDict[stream.friend] = {
-                        messages: getMessageList(JSON.parse(stream.messages)),
+                        messages: this._getMessageList(JSON.parse(stream.messages)),
                         read: stream.read
                     };
                 });
