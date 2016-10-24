@@ -1,0 +1,32 @@
+body, input, button {
+	font-family: Futura, sans-serif;
+}
+
+input, button {
+	border: none;
+}
+
+body {
+    padding: 25px;
+    background: #2A3035;
+    color: #8C9AA5;
+    border: 1px;
+    margin: 40px;
+    border-color: #B1C5D6;
+    border-style: solid;
+}
+
+input {
+    resize: none;
+    background: #5A6066;
+    color: #B1C5D6;
+    padding: 5px;
+    outline: none;
+}
+
+button {
+    background: #8C9AA5;
+    color: #2A3035;
+    display: block;
+    outline: none;
+}

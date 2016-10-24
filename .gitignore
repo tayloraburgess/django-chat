@@ -9,3 +9,7 @@ coverage
 build
 .DS_Store
 npm-debug.log
+
+backend/staticfiles/js/
+backend/staticfiles/css/
+backend/staticfiles/media/

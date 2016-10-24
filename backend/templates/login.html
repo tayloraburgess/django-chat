@@ -1,4 +1,5 @@
 {% block content %}
+<link rel='stylesheet' type='text/css' href='../static/css/static_styles.css'>
 
 {% if form.errors %}
 <p>Your username and password didn't match. Please try again.</p>
@@ -13,7 +14,7 @@
     {% endif %}
 {% endif %}
 
-<form method="post" action="{% url 'login' %}">
+<form method='post' action='{% url 'login' %}'>
 {% csrf_token %}
 <table>
 <tr>
@@ -26,8 +27,11 @@
 </tr>
 </table>
 
-<input type="submit" value="login" />
-<input type="hidden" name="next" value="{{ next }}" />
+<button type='submit'>Login</button>
+<input type='hidden' name='next' value='{{ next }}' />
 </form>
 
+<form action='../new_user'>
+    <button type='submit'>Create Account</button>
+</form>
 {% endblock %}

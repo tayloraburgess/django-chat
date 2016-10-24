@@ -1,6 +1,9 @@
+body, textarea, button {
+    font-family: Futura, sans-serif;   
+}
+
 body {
     padding: 25px;
-    font-family: Futura, sans-serif;
     background: #2A3035;
     color: #8C9AA5;
     border: 1px;
@@ -9,20 +12,12 @@ body {
     border-style: solid;
 }
 
-span.fake-link {
-    color: #B1C5D6;
-}
-
-span.fake-link:hover {
-    cursor: pointer;
-}
 textarea {
     resize: none;
     background: #5A6066;
     border: none;
     color: #B1C5D6;
     font-size: small;
-    font-family: Futura, sans-serif;
     padding: 10px;
     outline: none;
     width: 270px;
@@ -33,11 +28,16 @@ button {
     border: none;
     background: #8C9AA5;
     font-size: small;
-    font-family: Futura, sans-serif;
     color: #2A3035;
     display: block;
     outline: none;
 }
+
+ul {
+    list-style-type: none;
+    padding: 0px;
+}
+
 div.flex-container {
     display: -webkit-flex;
     display: flex;
@@ -52,20 +52,6 @@ div.flex-item-1 {
 div.flex-item-2 {
     width: 65%;
     margin: 15px;
-    margin-right: 0px;
-}
-
-ul {
-    list-style-type: none;
-    padding: 0px;
-} 
-
-li.from-user {
-    text-align: right;
-}
-
-button.message-button {
-    margin-left: auto;
     margin-right: 0px;
 }
 
@@ -85,6 +71,32 @@ div.splits {
     padding-right: 10px;
 }
 
+div.splits::-webkit-scrollbar {
+    background-color: #2A3035; 
+    width: 10px;
+}
+
+div.splits::-webkit-scrollbar-thumb {
+    background-color: #B1C5D6; 
+}
+
+span.fake-link {
+    color: #B1C5D6;
+}
+
+span.fake-link:hover {
+    cursor: pointer;
+}
+
+li.from-user {
+    text-align: right;
+}
+
+button.message-button {
+    margin-left: auto;
+    margin-right: 0px;
+}
+
 div#messages {
     height: 250px;
 }
@@ -95,13 +107,4 @@ div#friends {
 
 div#other-users {
     height: 130px;
-}
-
-div.splits::-webkit-scrollbar {
-    background-color: #2A3035; 
-    width: 10px;
-}
-
-div.splits::-webkit-scrollbar-thumb {
-    background-color: #B1C5D6; 
 }

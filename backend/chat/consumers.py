@@ -5,10 +5,16 @@ from channels import Group
 from api.models import Message
 from django.contrib.auth.models import User
 
-def message(message):
+def ws_message(message):
     data = json.loads(message.content['text'])
     if (data['type'] == 'handshake'):
         Group(str(data['user'])).add(message.reply_channel)
+        reply = {
+            'type': 'handshake_ok'
+        }
+        message.reply_channel.send({
+            'text': json.dumps(reply) 
+        })
     elif (data['type'] == 'message'):
         new_message = Message.objects.create(
             text=data['text'],

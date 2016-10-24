@@ -1,13 +1,14 @@
 {% block content %}
+<link rel='stylesheet' type='text/css' href='../static/css/static_styles.css'>
 
 {% if form.errors %}
 <p>Your username and password didn't match. Please try again.</p>
 {% endif %}
 
-<form action="{% url 'new_user' %}" method="post">
+<form action='{% url 'new_user' %}' method='post'>
 {% csrf_token %}
     {{ form.as_p }}
-    <input type="submit" value="Save" />
+    <button type='submit'>Save</button>
 </form>
 
 {% endblock %}
