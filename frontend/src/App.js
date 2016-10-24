@@ -6,24 +6,6 @@ import $ from 'jquery';
 const DEV = true;
 
 const App = React.createClass({
-	_sortMessages: function(messageList) {
-	    return messageList.sort((a, b) => {
-	       return a.date_sent <= b.date_sent ? -1 :1;  
-	    });
-	},
-
-	_getMessageList: function(resObj) {
-	    const messageList = resObj.map((obj) => {
-	        return {
-	            text: obj.fields.text,
-	            author: obj.fields.author,
-	            date_sent: obj.fields.date_sent,
-	            read: obj.fields.read
-	        }
-	    });
-	    return this._sortMessages(messageList);
-	},
-
     getInitialState: function() {
         return {
             userPk: 0, 
@@ -32,6 +14,61 @@ const App = React.createClass({
             userDict: {},
             socket: {}
         };
+    },
+
+    componentDidMount: function() {
+    	function sortMessages(messageList) {
+		    return messageList.sort((a, b) => {
+		       return a.date_sent <= b.date_sent ? -1 :1;  
+		    });
+		}
+
+		function getMessageList(resObj) {
+		    const messageList = resObj.map((obj) => {
+		        return {
+		            text: obj.fields.text,
+		            author: obj.fields.author,
+		            date_sent: obj.fields.date_sent,
+		            read: obj.fields.read
+		        }
+		    });
+		    return sortMessages(messageList);
+		}
+
+		function ajaxUsersSuccess(res) {
+			const users = {};
+            res.forEach((user) => {
+                users[user.pk] = user.fields.username;
+            });
+            this.setState({
+                userDict: users
+            });
+		}
+
+		function ajaxStreamsSuccess(res) {
+			const streamsDict = {}; 
+            res.streams.forEach((stream) => {
+                streamsDict[stream.friend] = {
+                    messages: getMessageList.call(this, JSON.parse(stream.messages)),
+                    read: stream.read
+                };
+            });
+            this.setState({
+               streamsDict: streamsDict, 
+            });
+		}
+
+		function ajaxCurrentSuccess(res) {
+			this.sockets(res.pk);
+            this.setState({
+                userPk: res.pk
+            });
+            $.get('api/v1/users', ajaxUsersSuccess.bind(this));
+            const streamURL = `api/v1/users/${this.state.userPk}/streams/`;
+            $.get(streamURL, ajaxStreamsSuccess.bind(this));
+		}
+
+        $.get('api/v1/users/current', ajaxCurrentSuccess.bind(this));
     },
 
     sockets: function(userPk) {
@@ -72,64 +109,37 @@ const App = React.createClass({
             });
     	}
 
+    	function newSocket(URI) {
+    		const ws = new WebSocket(URI);
+
+	        ws.onmessage = (message) => {
+	            const messageData = JSON.parse(message.data)
+	            if (messageData.type === 'new_message') {
+	                newMessage.call(this, messageData)
+	            } else if (messageData.type === 'message_echo') {
+	                messageEcho.call(this, messageData)
+	            }
+	        }
+
+	        ws.onopen = () => {
+	            const handshake = {
+	                type: 'handshake',
+	                user: userPk
+	            }
+	            ws.send(JSON.stringify(handshake));
+	        }
+	        return ws;
+    	}
+
         let socketURI;
         if (DEV) {
             socketURI = 'ws://localhost:8000';
         } else {
             socketURI = `ws://${location.host}`
         }
-        const ws = new WebSocket(socketURI);
-        ws.onmessage = (message) => {
-            const messageData = JSON.parse(message.data)
-            if (messageData.type === 'new_message') {
-                newMessage.call(this, messageData)
-            } else if (messageData.type === 'message_echo') {
-                messageEcho.call(this, messageData)
-            }
-        }
-
-        ws.onopen = () => {
-            const handshake = {
-                type: 'handshake',
-                user: userPk
-            }
-            ws.send(JSON.stringify(handshake));
-        }
-
+        const ws = newSocket.call(this, socketURI);
         this.setState({
             socket: ws
-        });
-    },
-
-    componentDidMount: function() {
-        $.get('api/v1/users/current', (userRes) => {
-            this.sockets(userRes.pk);
-            this.setState({
-                userPk: userRes.pk
-            });
-            $.get('api/v1/users', (res) => {
-                const users = {};
-                res.forEach((user) => {
-                    users[user.pk] = user.fields.username;
-                });
-                this.setState({
-                    userDict: users
-                });
-            });
-
-            const streamURL = `api/v1/users/${this.state.userPk}/streams/`;
-            $.get(streamURL, (res) => {
-                const streamsDict = {}; 
-                res.streams.forEach((stream) => {
-                    streamsDict[stream.friend] = {
-                        messages: this._getMessageList(JSON.parse(stream.messages)),
-                        read: stream.read
-                    };
-                });
-                this.setState({
-                   streamsDict: streamsDict, 
-                });
-            });
         });
     },
 
@@ -156,38 +166,11 @@ const App = React.createClass({
         }
     },
 
-    render: function() {
-        let messageList = [];
-        let friendList = [];
-        if (Object.keys(this.state.streamsDict).length > 0) {
-            friendList = Object.keys(this.state.streamsDict);
-        }     
-        const otherUsers = Object.keys(this.state.userDict).filter((user) => {
-            if (friendList.indexOf(user) === -1 && parseInt(user) !== this.state.userPk) {
-                return true; 
-            }
-            return false;
-        });
-        let friends;
-        let usersText = 'users';
-        if (friendList.length > 0) {
-            friends = (
-                <div>
-                    <h2>friends</h2>
-                    <Users 
-                        userDict={ this.state.userDict }
-                        streamsDict={ this.state.streamsDict }  
-                        userList={ friendList }
-                        changeStream={ this.changeStream }
-                        id='friends'
-                    />
-                </div>
-            );
-            usersText = 'other users';
-        }
-        let messages;
+    generateMessagesView: function() {
+    	let messages;
         if (this.state.currentStream > 0) {
             const currentStream = this.state.streamsDict[this.state.currentStream];
+            let messageList;
             if (currentStream) {
                 messageList = currentStream.messages;
             }
@@ -206,6 +189,54 @@ const App = React.createClass({
                 </div>
             );
         }
+        return messages;
+    },
+
+    generateFriendList: function() {
+    	let friendList = [];
+        if (Object.keys(this.state.streamsDict).length > 0) {
+            friendList = Object.keys(this.state.streamsDict);
+        }
+        return friendList;
+    },
+
+    generateOtherUsers: function(friendList) {
+    	return Object.keys(this.state.userDict).filter((user) => {
+            if (friendList.indexOf(user) === -1 && parseInt(user) !== this.state.userPk) {
+                return true; 
+            }
+            return false;
+        });
+    },
+
+    showFriendsOrNot: function(friendList) {
+    	let friends;
+    	if (friendList.length > 0) {
+            friends = (
+                <div>
+                    <h2>friends</h2>
+                    <Users 
+                        userDict={ this.state.userDict }
+                        streamsDict={ this.state.streamsDict }  
+                        userList={ friendList }
+                        changeStream={ this.changeStream }
+                        id='friends'
+                    />
+                </div>
+            );
+        }
+        return friends;
+    },
+
+    render: function() {
+        const friendList = this.generateFriendList();
+        const otherUsers = this.generateOtherUsers(friendList);
+        const friends = this.showFriendsOrNot(friendList);
+        let usersText = 'users';
+        if (friends) {
+        	usersText = 'other users';
+        }
+        const messages = this.generateMessagesView();
         return (
             <div>
                 <div>
@@ -235,8 +266,8 @@ const App = React.createClass({
 });
 
 const Users = React.createClass({
-    render: function() {
-        const userComponents = this.props.userList.map((user) => {
+	generateUserComponents: function() {
+		return this.props.userList.map((user) => {
            let read = true;
            if (this.props.streamsDict[user]) {
                read = this.props.streamsDict[user].read;
@@ -258,6 +289,10 @@ const Users = React.createClass({
                /> 
             ); 
         });
+	},
+
+    render: function() {
+        const userComponents = this.generateUserComponents();
         return (
             <div className="splits" id={ this.props.id }>
                 <ul>
@@ -296,19 +331,22 @@ const User = React.createClass({
 });
 
 const Messages = React.createClass({
-
     componentDidUpdate: function() {
         this.refs.messagesDiv.scrollTop = this.refs.messagesDiv.scrollHeight;
     },
 
-    render: function() {
-        const messages = this.props.messageList.map((message) => {
+    generateMessages: function() {
+    	return this.props.messageList.map((message) => {
             if (message.author === this.props.userPk) {
                 return (<li className='from-user'> { message.text } </li>);
             } else {
                 return (<li className='from-other'> { message.text } </li>);
             }
         });
+    },
+
+    render: function() {
+        const messages = this.generateMessages();
         return (
             <div className='splits' id='messages' ref='messagesDiv'>
                 <ul>
@@ -339,7 +377,6 @@ const Write = React.createClass({
         this.setState({
             text: ''
         });
-        
     },
 
     editMessage: function(event) {
