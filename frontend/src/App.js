@@ -170,7 +170,7 @@ const App = React.createClass({
     	let messages;
         if (this.state.currentStream > 0) {
             const currentStream = this.state.streamsDict[this.state.currentStream];
-            let messageList;
+            let messageList = [];
             if (currentStream) {
                 messageList = currentStream.messages;
             }

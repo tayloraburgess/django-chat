@@ -92,6 +92,6 @@ This app is a REST API that the React frontend requests data from.
 
 This app is designed to be deployed & served to remote clients, and tracks those clients (i.e. logged-in users) across browser sessions. So, to test the app's messaging capabilites locally, you'll need to create multiple users and log those users into different browser sessions (you could do this using Chrome's incognito mode or something similar, or separate browsers). To create the users, you can either:
 
-- Create them manually by creating an admin user with `python manage.py createsuperuser`, and navigating to `localhost:8000/admin`
+- Navigate directly to `localhost:8000` and selecting 'Create Account'
 
-- Create them within the app itself by navigating directly to `localhost:8000` and selecting 'Create Account'
+- Navigate directly to `localhost:8000/new_user`
