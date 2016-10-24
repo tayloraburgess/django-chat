@@ -202,7 +202,7 @@ const App = React.createClass({
 
     generateOtherUsers: function(friendList) {
     	return Object.keys(this.state.userDict).filter((user) => {
-            if (friendList.indexOf(user) === -1 && parseInt(user) !== this.state.userPk) {
+            if (friendList.indexOf(user) === -1 && parseInt(user, 10) !== this.state.userPk) {
                 return true; 
             }
             return false;
@@ -281,9 +281,10 @@ const Users = React.createClass({
            return a > b ? -1 : 1
         }).sort((a, b) => {
            return a.read ? 1 : -1 
-        }).map((data) => {
+        }).map((data, i) => {
            return (
                <User
+                   key={ i }
                    data={ data }
                    changeStream={ this.props.changeStream }
                /> 
@@ -296,9 +297,9 @@ const Users = React.createClass({
         return (
             <div className="splits" id={ this.props.id }>
                 <ul>
-                    { userComponents.map((component) => {
+                    { userComponents.map((component, i ) => {
                         return (
-                            <li>
+                            <li key={ i }>
                                 { component }
                             </li>
                         );
@@ -336,11 +337,11 @@ const Messages = React.createClass({
     },
 
     generateMessages: function() {
-    	return this.props.messageList.map((message) => {
+    	return this.props.messageList.map((message, i) => {
             if (message.author === this.props.userPk) {
-                return (<li className='from-user'> { message.text } </li>);
+                return (<li className='from-user' key={ i }> { message.text } </li>);
             } else {
-                return (<li className='from-other'> { message.text } </li>);
+                return (<li className='from-other' key={ i }> { message.text } </li>);
             }
         });
     },
